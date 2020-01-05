@@ -55,7 +55,6 @@
                 android:id="@+id/descRelLyt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/userRelLyt"
                 android:layout_marginTop="15dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginRight="20dp">
@@ -70,7 +69,6 @@
                     android:textColor="#52575C"
                     android:drawableLeft="@drawable/language_indicator_circle"
                     android:drawablePadding="2dp"
-                    android:layout_below="@+id/rowDescription"
                     android:layout_alignParentLeft="true" />
 
                 <TextView
@@ -82,7 +80,6 @@
                     android:fontFamily="sans-serif"
                     android:textColor="#52575C"
                     android:drawableLeft="@mipmap/star_yellow_16"
-                    android:layout_below="@+id/rowDescription"
                     android:layout_centerInParent="true" />
 
                 <TextView
@@ -94,7 +91,6 @@
                     android:fontFamily="sans-serif"
                     android:drawableLeft="@mipmap/fork_black_16"
                     android:textColor="#52575C"
-                    android:layout_below="@+id/rowDescription"
                     android:layout_alignParentRight="true" />
 
             </RelativeLayout>

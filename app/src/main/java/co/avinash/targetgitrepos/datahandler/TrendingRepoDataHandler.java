@@ -1,6 +1,7 @@
 package co.avinash.targetgitrepos.datahandler;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -30,10 +31,8 @@ import co.avinash.targetgitrepos.utils.TrendingRepoUtils;
 
 public class TrendingRepoDataHandler implements Response.Listener<IDataModel>, Response.ErrorListener {
 
-    private static final String TAG = TrendingRepoDataHandler.class.getSimpleName();
-
     private Context mContext;
-    private TrendingRepoApiResponseModel trendingRepoApiResponseModel;
+    private TrendingRepoApiResponseModel mTrendingRepoApiResponseModel;
     private NetworkRequestQueueHandler mRequetQueue;
     private TrendingRepoDataFetchListener trendingRepoDataFetchListener;
 
@@ -42,34 +41,49 @@ public class TrendingRepoDataHandler implements Response.Listener<IDataModel>, R
         trendingRepoDataFetchListener = repoDataFetchListener;
     }
 
-    public void fetchTrendingRepoData(boolean forceFetch, Date dataDownloadTimestamp) {
-        boolean dataFetched;
-        boolean isDataExpired = TrendingRepoUtils.isDataExpired(dataDownloadTimestamp);
-        if (!forceFetch && !isDataExpired) {
-            dataFetched = fetchCachedData();
-            if (dataFetched) {
-                return;
-            }
-        }
+    public void fetchTrendingRepoData(final boolean forceFetch, final Date dataDownloadTimestamp) {
+        new AsyncTask<Void, Void, Boolean>() {
 
-        if (mContext != null && TrendingRepoUtils.isNetworkAvailable(mContext)) {
-            NetworkRequestObject requestHandler = new NetworkRequestObject(
-                    TrendingRepoConstants.TRENDING_REPO_URL, Request.Method.GET, null, this, this,
-                    new TrendingRepoApiResponseModel());
-            if (mRequetQueue == null) {
-                mRequetQueue = NetworkRequestQueueHandler.getInstance(mContext);
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                boolean isDataExpired = TrendingRepoUtils.isDataExpired(dataDownloadTimestamp);
+                if (!forceFetch && !isDataExpired) {
+                    boolean dataFetched = fetchCachedData();
+                    if (dataFetched) {
+                        return true;
+                    }
+                }
+
+                if (mContext != null && TrendingRepoUtils.isNetworkAvailable(mContext)) {
+                    NetworkRequestObject requestHandler = new NetworkRequestObject(
+                            TrendingRepoConstants.TRENDING_REPO_URL, Request.Method.GET, null,
+                            TrendingRepoDataHandler.this, TrendingRepoDataHandler.this,
+                            new TrendingRepoApiResponseModel());
+                    if (mRequetQueue == null) {
+                        mRequetQueue = NetworkRequestQueueHandler.getInstance(mContext);
+                    }
+                    mRequetQueue.addToRequestQueue(requestHandler);
+                    return true;
+                }
+
+                return false;
             }
-            mRequetQueue.addToRequestQueue(requestHandler);
-        } else {
-            if (!forceFetch) {
-                trendingRepoDataFetchListener.trendingRepoDataFetchFailed();
-            } else {
-                dataFetched = fetchCachedData();
-                if (!dataFetched) {
-                    trendingRepoDataFetchListener.trendingRepoDataFetchFailed();
+
+            @Override
+            protected void onPostExecute(Boolean requestQueued) {
+                super.onPostExecute(requestQueued);
+                if(!requestQueued) {
+                    if (!forceFetch) {
+                        trendingRepoDataFetchListener.trendingRepoDataFetchFailed();
+                    } else {
+                        boolean dataFetched = fetchCachedData();
+                        if (!dataFetched) {
+                            trendingRepoDataFetchListener.trendingRepoDataFetchFailed();
+                        }
+                    }
                 }
             }
-        }
+        }.execute();
     }
 
     private boolean fetchCachedData() {
@@ -86,6 +100,7 @@ public class TrendingRepoDataHandler implements Response.Listener<IDataModel>, R
                 }
             }
         } catch (Exception exception) {
+            Log.e("AVINASH", exception.getMessage());
         }
         return false;
     }
@@ -100,14 +115,14 @@ public class TrendingRepoDataHandler implements Response.Listener<IDataModel>, R
     @Override
     public void onResponse(IDataModel response) {
         if (response instanceof TrendingRepoApiResponseModel) {
-            trendingRepoApiResponseModel = (TrendingRepoApiResponseModel) response;
+            mTrendingRepoApiResponseModel = (TrendingRepoApiResponseModel) response;
             if (trendingRepoDataFetchListener != null) {
-                if (trendingRepoApiResponseModel != null
-                        && trendingRepoApiResponseModel.getTrendingRepoModels() != null
-                        && trendingRepoApiResponseModel.getTrendingRepoModels().size() > 0) {
-                    cacheDownloadedData(trendingRepoApiResponseModel);
+                if (mTrendingRepoApiResponseModel != null
+                        && mTrendingRepoApiResponseModel.getTrendingRepoModels() != null
+                        && mTrendingRepoApiResponseModel.getTrendingRepoModels().size() > 0) {
+                    cacheDownloadedData(mTrendingRepoApiResponseModel);
                     TrendingRepoUtils.saveDataDownloadTimestamp(mContext);
-                    trendingRepoDataFetchListener.trendingRepoDataFecthed(trendingRepoApiResponseModel.getTrendingRepoModels());
+                    trendingRepoDataFetchListener.trendingRepoDataFecthed(mTrendingRepoApiResponseModel.getTrendingRepoModels());
                 } else {
                     trendingRepoDataFetchListener.trendingRepoDataFetchFailed();
                 }
@@ -115,60 +130,88 @@ public class TrendingRepoDataHandler implements Response.Listener<IDataModel>, R
         }
     }
 
-    private void cacheDownloadedData(TrendingRepoApiResponseModel trendingRepoApiResponseModel) {
-        String jsonString = new Gson().toJson(trendingRepoApiResponseModel.getTrendingRepoModels());
-        try {
-            if (!TextUtils.isEmpty(jsonString)) {
-                JSONFileOperator.saveData(mContext, jsonString);
+    private void cacheDownloadedData(final TrendingRepoApiResponseModel trendingRepoApiResponseModel) {
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                String jsonString = new Gson().toJson(trendingRepoApiResponseModel.getTrendingRepoModels());
+                try {
+                    if (!TextUtils.isEmpty(jsonString)) {
+                        JSONFileOperator.saveData(mContext, jsonString);
+                    }
+                } catch (Exception exception) {
+                    Log.e("AVINASH", exception.getMessage());
+                }
+                return null;
             }
-        } catch (Exception exception) {
-        }
+        }.execute();
     }
 
-    public void sortDataByStars(TrendingRepoDataSortListener trendingRepoDataSortListener) {
-        if (trendingRepoApiResponseModel != null && trendingRepoApiResponseModel.getTrendingRepoModels() != null) {
-            Collections.sort(trendingRepoApiResponseModel.getTrendingRepoModels(), new Comparator<TrendingRepoModel>() {
-                @Override
-                public int compare(TrendingRepoModel repo1, TrendingRepoModel repo2) {
-                    return repo1.getStars().compareTo(repo2.getStars());
-                }
-            });
+    public void sortDataByStars(final TrendingRepoDataSortListener trendingRepoDataSortListener) {
+        new AsyncTask<Void, Void, Void>() {
 
-            if (trendingRepoDataSortListener != null) {
-                trendingRepoDataSortListener.trendingRepoDataSorted(trendingRepoApiResponseModel.getTrendingRepoModels());
+            @Override
+            protected Void doInBackground(Void... voids) {
+                if (mTrendingRepoApiResponseModel != null && mTrendingRepoApiResponseModel.getTrendingRepoModels() != null) {
+                    Collections.sort(mTrendingRepoApiResponseModel.getTrendingRepoModels(), new Comparator<TrendingRepoModel>() {
+                        @Override
+                        public int compare(TrendingRepoModel repo1, TrendingRepoModel repo2) {
+                            return repo1.getStars().compareTo(repo2.getStars());
+                        }
+                    });
+                }
+                return null;
             }
-        }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                if (trendingRepoDataSortListener != null) {
+                    trendingRepoDataSortListener.trendingRepoDataSorted(mTrendingRepoApiResponseModel.getTrendingRepoModels());
+                }
+            }
+        }.execute();
     }
 
-    public void sortDataByName(TrendingRepoDataSortListener trendingRepoDataSortListener) {
-        if (trendingRepoApiResponseModel != null && trendingRepoApiResponseModel.getTrendingRepoModels() != null) {
-            List<TrendingRepoModel> modelList = trendingRepoApiResponseModel.getTrendingRepoModels();
-            Collections.sort(modelList, new Comparator<TrendingRepoModel>() {
-                @Override
-                public int compare(TrendingRepoModel repo1, TrendingRepoModel repo2) {
-                    String firstName = repo1.getName();
-                    String secondName = repo2.getName();
-                    if(firstName.contains("-")) {
-                        firstName = firstName.split("-")[0];
-                    }
-                    if(secondName.contains("-")) {
-                        secondName = secondName.split("-")[0];
-                    }
-                    Log.d("AVINASH", "AVINASH: " + firstName + " " + secondName);
-                    return firstName.compareToIgnoreCase(secondName);
-                }
-            });
+    public void sortDataByName(final TrendingRepoDataSortListener trendingRepoDataSortListener) {
+        new AsyncTask<Void, Void, Void>() {
 
-            if (trendingRepoDataSortListener != null) {
-                trendingRepoApiResponseModel.setTrendingRepoModels(modelList);
-                trendingRepoDataSortListener.trendingRepoDataSorted(modelList);
+            @Override
+            protected Void doInBackground(Void... voids) {
+                if (mTrendingRepoApiResponseModel != null && mTrendingRepoApiResponseModel.getTrendingRepoModels() != null) {
+                    Collections.sort(mTrendingRepoApiResponseModel.getTrendingRepoModels(), new Comparator<TrendingRepoModel>() {
+                        @Override
+                        public int compare(TrendingRepoModel repo1, TrendingRepoModel repo2) {
+                            String firstName = repo1.getName();
+                            String secondName = repo2.getName();
+                            if (firstName.contains("-")) {
+                                firstName = firstName.split("-")[0];
+                            }
+                            if (secondName.contains("-")) {
+                                secondName = secondName.split("-")[0];
+                            }
+                            Log.d("AVINASH", "AVINASH: " + firstName + " " + secondName);
+                            return firstName.compareToIgnoreCase(secondName);
+                        }
+                    });
+                }
+                return null;
             }
-        }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                super.onPostExecute(aVoid);
+                if (trendingRepoDataSortListener != null) {
+                    trendingRepoDataSortListener.trendingRepoDataSorted(mTrendingRepoApiResponseModel.getTrendingRepoModels());
+                }
+            }
+        }.execute();
     }
 
     @TestOnly
     public List<TrendingRepoModel> getTrendingRepos() {
-        return trendingRepoApiResponseModel == null ? null : trendingRepoApiResponseModel.getTrendingRepoModels();
+        return mTrendingRepoApiResponseModel == null ? null : mTrendingRepoApiResponseModel.getTrendingRepoModels();
     }
 
     @TestOnly

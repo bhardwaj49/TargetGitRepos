@@ -84,6 +84,7 @@ public class TrendingRepoHomeActivity extends AppCompatActivity implements Trend
         mPullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                mSearchBox.setText("");
                 fetchTrendingRepoData(true);
                 mPullToRefresh.setRefreshing(false);
             }

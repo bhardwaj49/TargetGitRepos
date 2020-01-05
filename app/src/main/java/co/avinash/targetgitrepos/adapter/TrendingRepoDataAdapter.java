@@ -28,23 +28,24 @@ public class TrendingRepoDataAdapter extends RecyclerView.Adapter<TrendingRepoDa
         implements Filterable {
 
     private static final String TAG = TrendingRepoDataAdapter.class.getSimpleName();
+
     private List<TrendingRepoModel> mFilteredNameList;
     private List<TrendingRepoModel> mTrendingRepoModels;
     private Context mContext;
     private NameFilter mNameFilter;
-    private TrendingRepoNameFilterListener trendingRepoNameFilterListener;
-    private TrendingRepoItemClickListener trendingRepoItemClickListener;
+    private TrendingRepoNameFilterListener mTrendingRepoNameFilterListener;
+    private TrendingRepoItemClickListener mTrendingRepoItemClickListener;
 
     @Inject
     public TrendingRepoDataAdapter() {
     }
 
     public void setNameFilterListener(TrendingRepoNameFilterListener trendingRepoNameFilterListener) {
-        this.trendingRepoNameFilterListener = trendingRepoNameFilterListener;
+        this.mTrendingRepoNameFilterListener = trendingRepoNameFilterListener;
     }
 
     public void setTrendingRepoItemClickListener(TrendingRepoItemClickListener trendingRepoItemClickListener) {
-        this.trendingRepoItemClickListener = trendingRepoItemClickListener;
+        this.mTrendingRepoItemClickListener = trendingRepoItemClickListener;
     }
 
     @Override
@@ -79,8 +80,8 @@ public class TrendingRepoDataAdapter extends RecyclerView.Adapter<TrendingRepoDa
         holder.mParentLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(trendingRepoItemClickListener != null) {
-                    trendingRepoItemClickListener.handleItemClick(model);
+                if(mTrendingRepoItemClickListener != null) {
+                    mTrendingRepoItemClickListener.handleItemClick(model);
                 }
             }
         });
@@ -166,11 +167,11 @@ public class TrendingRepoDataAdapter extends RecyclerView.Adapter<TrendingRepoDa
         @Override
         protected void publishResults(CharSequence constraint,
                                       FilterResults results) {
-            if(trendingRepoNameFilterListener != null) {
+            if(mTrendingRepoNameFilterListener != null) {
                 if (results.count > 0) {
-                    trendingRepoNameFilterListener.showNoReposLayout(false);
+                    mTrendingRepoNameFilterListener.showNoReposLayout(false);
                 } else {
-                    trendingRepoNameFilterListener.showNoReposLayout(true);
+                    mTrendingRepoNameFilterListener.showNoReposLayout(true);
                 }
             }
             notifyDataSetChanged();
