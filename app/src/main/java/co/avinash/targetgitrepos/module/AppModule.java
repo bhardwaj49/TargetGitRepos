@@ -1,20 +1,12 @@
 package co.avinash.targetgitrepos.module;
 
-import co.avinash.targetgitrepos.adapter.TrendingRepoDataAdapter;
-import co.avinash.targetgitrepos.presenter.TrendingRepoPresenter;
+import co.avinash.targetgitrepos.views.TrendingRepoHomeActivity;
 import dagger.Module;
-import dagger.Provides;
+import dagger.android.ContributesAndroidInjector;
 
 @Module
-public class AppModule {
+public abstract class AppModule {
 
-    @Provides
-    public TrendingRepoPresenter provideTrendingRepoPresenter() {
-        return new TrendingRepoPresenter();
-    }
-
-    @Provides
-    public TrendingRepoDataAdapter provideTrendingRepoAdapter() {
-        return new TrendingRepoDataAdapter();
-    }
+    @ContributesAndroidInjector
+    abstract TrendingRepoHomeActivity contributeActivityInjector();
 }

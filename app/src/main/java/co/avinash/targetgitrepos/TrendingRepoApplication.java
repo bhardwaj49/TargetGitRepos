@@ -2,15 +2,27 @@ package co.avinash.targetgitrepos;
 
 import android.app.Application;
 
-import co.avinash.targetgitrepos.component.ApplicationComponent;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import co.avinash.targetgitrepos.component.DaggerApplicationComponent;
-import co.avinash.targetgitrepos.module.AppModule;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.HasAndroidInjector;
 
-public class TrendingRepoApplication extends Application {
+@Singleton
+public class TrendingRepoApplication extends Application implements HasAndroidInjector {
 
-    ApplicationComponent applicationComponent = DaggerApplicationComponent.builder().appModule(new AppModule()).build();
+    @Inject
+    DispatchingAndroidInjector<Object> dispatchingAndroidInjector;
 
-    public ApplicationComponent getApplicationComponent() {
-        return applicationComponent;
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        DaggerApplicationComponent.create().inject(this);
+    }
+
+    @Override
+    public DispatchingAndroidInjector<Object> androidInjector() {
+        return dispatchingAndroidInjector;
     }
 }

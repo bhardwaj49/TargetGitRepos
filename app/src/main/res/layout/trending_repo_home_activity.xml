@@ -61,13 +61,12 @@
 
     </RelativeLayout>
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/myToolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:background="@color/colorAccent"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
         <ImageView
@@ -75,6 +74,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
+            android:background="@color/colorAccent"
+            android:tint="#FFFFFF"
             android:gravity="center"
             android:paddingRight="16dp"
             android:src="@mipmap/more_black_24" />
@@ -85,67 +86,65 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:background="@color/colorAccent"
             android:fontFamily="sans-serif-medium"
             android:text="@string/app_name"
-            android:textColor="#25282B"
+            android:textColor="#FFFFFF"
             android:textSize="21dp" />
 
 
-    </android.support.v7.widget.Toolbar>
+    </androidx.appcompat.widget.Toolbar>
 
-    <android.support.v4.widget.SwipeRefreshLayout
+    <EditText
+        android:id="@+id/searchBox"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_margin="10dp"
+        android:focusableInTouchMode="true"
+        android:imeOptions="actionDone"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:background="@android:color/transparent"
+        android:drawableLeft="@drawable/search_icon"
+        android:drawablePadding="15dp"
+        android:hint="Search by name"
+        android:padding="10dp"
+        android:layout_below="@id/myToolbar"/>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/pullToRefresh"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/myToolbar">
+        android:layout_below="@+id/searchBox">
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/trending_repo_recycler"
+            android:background="#FFFFFF"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <com.facebook.shimmer.ShimmerFrameLayout
-        android:id="@+id/parentShimmerLayout"
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minHeight="50dp"
+        android:minWidth="50dp"
+        android:layout_centerInParent="true"/>
+
+    <RelativeLayout
+        android:id="@+id/no_repos_lyt"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        shimmer:duration="800">
+        android:visibility="gone">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <include layout="@layout/data_placeholder_layout" />
-
-            <include layout="@layout/data_placeholder_layout" />
-
-            <include layout="@layout/data_placeholder_layout" />
-
-            <include layout="@layout/data_placeholder_layout" />
-
-            <include layout="@layout/data_placeholder_layout" />
-
-            <include layout="@layout/data_placeholder_layout" />
-
-            <include layout="@layout/data_placeholder_layout" />
-
-            <include layout="@layout/data_placeholder_layout" />
-
-            <include layout="@layout/data_placeholder_layout" />
-
-            <include layout="@layout/data_placeholder_layout" />
-
-            <include layout="@layout/data_placeholder_layout" />
-
-            <include layout="@layout/data_placeholder_layout" />
-
-            <include layout="@layout/data_placeholder_layout" />
-
-            <include layout="@layout/data_placeholder_layout" />
-        </LinearLayout>
-
-    </com.facebook.shimmer.ShimmerFrameLayout>
+            android:textSize="30sp"
+            android:text="Sorry, No repos found"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
 
 </RelativeLayout>

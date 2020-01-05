@@ -1,14 +1,11 @@
 package co.avinash.targetgitrepos.component;
 
-import javax.inject.Singleton;
-
+import co.avinash.targetgitrepos.TrendingRepoApplication;
 import co.avinash.targetgitrepos.module.AppModule;
-import co.avinash.targetgitrepos.views.TrendingRepoHomeActivity;
 import dagger.Component;
+import dagger.android.AndroidInjectionModule;
+import dagger.android.AndroidInjector;
 
-@Singleton
-@Component(modules = AppModule.class)
-public interface ApplicationComponent {
-
-    void inject(TrendingRepoHomeActivity homeActivity);
+@Component(modules = {AppModule.class, AndroidInjectionModule.class})
+public interface ApplicationComponent extends AndroidInjector<TrendingRepoApplication> {
 }
