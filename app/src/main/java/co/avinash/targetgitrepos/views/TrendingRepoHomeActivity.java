@@ -2,6 +2,7 @@ package co.avinash.targetgitrepos.views;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -101,6 +102,7 @@ public class TrendingRepoHomeActivity extends AppCompatActivity implements Trend
                 LinearLayoutManager.VERTICAL, false);
         mTrendingRepoRecyclerVw.setLayoutManager(linearLayoutManager);
         mProgressBar = findViewById(R.id.progressBar);
+        mProgressBar.setVisibility(View.VISIBLE);
         mErrorLayout = findViewById(R.id.errorLayout);
         mNoReposLayout = findViewById(R.id.no_repos_lyt);
         mSearchBox = findViewById(R.id.searchBox);
@@ -149,9 +151,6 @@ public class TrendingRepoHomeActivity extends AppCompatActivity implements Trend
     }
 
     private void fetchTrendingRepoData(boolean forceFetch) {
-        if (mProgressBar != null) {
-            mProgressBar.setVisibility(View.VISIBLE);
-        }
         if (mTrendingRepoPresenter != null) {
             mTrendingRepoPresenter.fetchTrendingRepoData(forceFetch);
         }
@@ -174,6 +173,7 @@ public class TrendingRepoHomeActivity extends AppCompatActivity implements Trend
     private void updateAdapterAndDisplayData(List<TrendingRepoModel> trendingRepoModels) {
         mTrendingRepoDataAdapter.setContext(this);
         mTrendingRepoDataAdapter.setNameFilterListener(this);
+        mTrendingRepoDataAdapter.setTrendingRepoItemClickListener(this);
         mTrendingRepoDataAdapter.setTrendingRepoModels(trendingRepoModels);
         mTrendingRepoRecyclerVw.setAdapter(mTrendingRepoDataAdapter);
     }
