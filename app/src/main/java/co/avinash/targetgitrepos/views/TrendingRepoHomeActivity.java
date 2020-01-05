@@ -2,7 +2,6 @@ package co.avinash.targetgitrepos.views;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -106,6 +105,7 @@ public class TrendingRepoHomeActivity extends AppCompatActivity implements Trend
         mErrorLayout = findViewById(R.id.errorLayout);
         mNoReposLayout = findViewById(R.id.no_repos_lyt);
         mSearchBox = findViewById(R.id.searchBox);
+        mSearchBox.setVisibility(View.GONE);
         mSearchBox.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -151,6 +151,9 @@ public class TrendingRepoHomeActivity extends AppCompatActivity implements Trend
     }
 
     private void fetchTrendingRepoData(boolean forceFetch) {
+        if(mProgressBar != null) {
+            mProgressBar.setVisibility(View.VISIBLE);
+        }
         if (mTrendingRepoPresenter != null) {
             mTrendingRepoPresenter.fetchTrendingRepoData(forceFetch);
         }
@@ -176,6 +179,7 @@ public class TrendingRepoHomeActivity extends AppCompatActivity implements Trend
         mTrendingRepoDataAdapter.setTrendingRepoItemClickListener(this);
         mTrendingRepoDataAdapter.setTrendingRepoModels(trendingRepoModels);
         mTrendingRepoRecyclerVw.setAdapter(mTrendingRepoDataAdapter);
+        mSearchBox.setVisibility(View.VISIBLE);
     }
 
     @Override
